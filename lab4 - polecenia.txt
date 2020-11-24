@@ -1,0 +1,81 @@
+lab.04
+
+1.1
+DELETE FROM postac 
+WHERE rodzaj='wiking' AND nazwa<>'Bjorn' ORDER BY data_ur ASC LIMIT 2;
+INSERT INTO postacie (id_postaci, imie, rodzaj)
+VALUES ('5','Tostir','wiking');
+,'Ragnar',
+'Tostir');
+
+1.2
+ALTER TABLE postac DROP FOREIGN KEY postac_ibfk_1;
+
+ALTER TABLE postac DROP FOREIGN KEY walizka_ibfk_1;
+
+ALTER TABLE postac DROP FOREIGN KEY przetwory_ibfk_1;
+
+ALTER TABLE postac DROP FOREIGN KEY przetwory_ibfk_2;
+
+ALTER TABLE postac MODIFY id_postaci INT;
+
+ALTER TABLE postac DROP PRIMARY KEY;
+
+
+2.1
+ALTER TABLE postac
+ADD pesel VARCHAR(11) PRIMARY KEY;
+
+2.2
+ALTER TABLE postac
+MODIFY COLUMN rodzaj enum('wiking', 'ptak', 'kobieta', 'syrena');
+
+2.3
+INSERT INTO postac (id_postaci, nazwa, rodzaj, data_ur, wiek, pesel)
+VALUES ('10', 'Gertruda Nieszczera', 'syrena', '1671-03-21', '490', '95673425970'); 
+
+
+3.1
+UPDATE postac
+SET statek = 'Drakkar'
+WHERE nazwa LIKE '%a%';
+
+3.2
+UPDATE statek SET max_ladownosc=max_ladownosc*0.7 WHERE
+data_wodowania >= '1901-01-01' AND data_wodowania <= '2000-12-31';
+
+
+4.1
+ALTER TABLE postac
+MODIFY COLUMN rodzaj enum('wiking', 'ptak', 'kobieta', 'syrena', 'waz');
+
+INSERT INTO postac (id_postaci, nazwa, rodzaj, data_ur, wiek, pesel)
+VALUES ('11', 'Loko', 'waz', '2001-03-22', '1', '67367893452'); 
+
+4.2
+CREATE TABLE marynarz SELECT * FROM postac;
+
+
+5.1
+UPDATE postac
+SET statek = NULL;
+
+5.2
+DELETE FROM postac
+WHERE nazwa = 'Helga';
+
+5.3
+DELETE FROM statek
+WHERE max_ladownosc >=0 AND max_ladownosc <= 51;
+
+5.4
+DROP TABLE statek;
+
+5.5
+CREATE TABLE zwierz (
+id INT PRIMARY KEY AUTO_INCREMENT,
+nazwa VARCHAR(45),
+wiek INT(3));
+
+5.6
+INSERT INTO postac SELECT * FROM zwierz; 

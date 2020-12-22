@@ -1,0 +1,101 @@
+lab.08
+
+1.1 Napisz wyzwalacz, który przed wstawieniem lub modyfikacją tabeli kreatura sprawdzi czy waga jest większa od zera:
+
+DELIMITER //
+CREATE TRIGGER kreatura_before_insert
+BEFORE INSERT ON kreatura
+FOR EACH ROW
+BEGIN
+	IF NEW.waga > 0
+    THEN
+		SET NEW.waga = 0;
+	END IF;
+END
+//
+DELIMITER ;
+
+
+2.1 Stwórz tabelę archiwum_wypraw z polami id_wyprawy, nazwa, data_rozpoczecia, data_zakonczenia, kierownik (varchar), do której będą wstawiane rekordy po usunięciu z tabeli wyprawa. 
+Do kolumny kierownik wstawiane jest nazwa kreatury na podstawie usuwanego id_kreatury:
+
+DELIMITER //
+CREATE TRIGGER archiwum_wypraw
+AFTER DELETE ON wyprawa
+FOR EACH ROW
+BEGIN
+	INSERT INTO
+	archiwum_wypraw(kierownik)
+	VALUES (old.id_kreatury);
+END
+//
+DELIMITER ;
+
+
+3.1 Napisz procedurę o nazwie "eliksir_sily", która będzie podnosiła wartość pola udzwig z tabeli kreatura 
+o 20% na podstawie id_kreaturyprzekazywanego jako parametr:
+
+DELIMITER //
+CREATE PROCEDURE eliksir_sily(IN id int)
+BEGIN
+UPDATE kreatura SET udzwig = 1.2 * udzwig WHERE id_kreatury = id;
+END
+//
+DELIMITER ; 
+
+3.2 Napisz funkcję, która będzie pobierała tekst i zwracała go z wielkich liter:
+
+DELIMITER //
+CREATE FUNCTION tekst_wielki(tekst varchar(100))
+    RETURNS varchar(100)
+BEGIN
+    DECLARE duze VARCHAR(100);
+    SELECT UPPER(tekst) into @duze;
+    RETURN @duze;
+END 
+//
+DELIMITER ;
+
+
+4.1 Stwórz tabelę "system_alarmowy" z polami, id_alarmu, wiadomosc:
+
+CREATE TABLE system_alarmowy (
+id_alarmu INT PRIMARY KEY,
+wiadomosc VARCHAR(45));
+
+4.2 Dodaj wyzwalacz, który będzie sprawdzał czy w tabeli wyprawy pojawiła się misja, w której bierze udział teściowa oraz czy jednym z sektorów misji jest domek dziadka. 
+Jeżeli w/w zaistnieje wyzwalacz wstawi rekord do tabeli "system_alarmowy" z treścią "Teściowa nadchodzi !!!":
+
+DELIMITER $$
+CREATE TRIGGER sprawdz_tesciowa
+AFTER INSERT ON wyprawa
+FOR EACH ROW
+BEGIN
+DECLARE zmienna INT;
+SELECT count(*) INTO zmienna
+FROM etapy_wyprawy AS e, kreatura AS k, wyprawa AS w, uczestnicy AS u
+WHERE e.idWyprawy=w.id_wyprawy AND k.idKreatury=u.id_uczestnika
+AND u.id_wyprawy=w.id_wyprawy
+AND k.nazwa='Tesciowa' AND e.sektor=7
+AND w.id_wyprawy=NEW.id_wyprawy;
+IF zmienna > 0
+THEN
+INSERT INTO system_alarmowy VALUES(DEFAULT, 'Tesciowa nadchodzi !!!');
+END IF;
+END
+$$
+DELIMITER;
+
+
+5.1 Napisz procedurę mającą jako parametry wyjściowe średnią, sumę i maks udźwigu z tabeli kreatura:
+DELIMITER $$
+CREATE PROCEDURE srednia_itp(
+OUT srednia FLOAT,
+OUT suma FLOAT,
+OUT maks FLOAT)
+BEGIN
+SELECT avg(udzwig), sum(udzwig), max(udzwig)
+INTO srednia, suma, maks FROM kreatura;
+END
+$$
+DELIMITER ;
